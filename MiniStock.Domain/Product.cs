@@ -34,8 +34,8 @@ public sealed class Product
     public void DecreaseStock(int quantity)
     {
         // Düşülecek miktar eksi bir değer olamaz
-        if (quantity < 0)
-            throw new ArgumentException("Düşülecek miktar negatif olamaz.");
+        if (quantity <= 0)
+            throw new ArgumentException("Azaltılacak stok miktarı sıfırdan büyük olmalıdır.");
 
         // Kural 4: Mevcut stoktan fazla ürün düşülemez.
         if (StockQuantity - quantity < 0)
