@@ -1,7 +1,8 @@
 using MediatR;
-using MiniStock.Domain;
+// Artık ProductDto'yu kullanacağız
+using MiniStock.Application.Products; 
 
 namespace MiniStock.Application.Products.GetProducts;
 
-public sealed record GetProductsQuery()
-    : IRequest<List<Product>>;
+// List<Product> yerine List<ProductDto>
+public record GetProductsQuery : IRequest<List<ProductDto>>;

@@ -1,23 +1,24 @@
 using MediatR;
-using MiniStock.Domain;
+using MiniStock.Application.Products;
 
 namespace MiniStock.Application.Products.GetProducts;
 
-public sealed class GetProductsQueryHandler
-    : IRequestHandler<GetProductsQuery, List<Product>>
+public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, List<ProductDto>>
 {
     private readonly IProductRepository _productRepository;
 
-    public GetProductsQueryHandler(
-        IProductRepository productRepository)
+    public GetProductsQueryHandler(IProductRepository productRepository)
     {
         _productRepository = productRepository;
     }
 
-    public async Task<List<Product>> Handle(
-        GetProductsQuery query,
-        CancellationToken cancellationToken)
+    public async Task<List<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        return await _productRepository.GetAllAsync();
+        var products = await _productRepository.GetAllAsync();
+
+        // İşte "elle" yaptığımız dönüşüm burası:
+        return products
+            .Select(p => new ProductDto(p.Id, p.Name, p.UnitPrice, p.StockQuantity))
+            .ToList();
     }
 }
