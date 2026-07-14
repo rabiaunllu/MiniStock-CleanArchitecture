@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
+using MiniStock.Application.Common.Exceptions; // <--- 1. Bunu ekle
 
 namespace MiniStock.WebApi.ExceptionHandlers;
 
@@ -19,8 +20,20 @@ public class GlobalExceptionHandler : IExceptionHandler
             }, cancellationToken);
             return true;
         }
+        
+        // <--- 2. Buraya bu bloğu ekle
+        else if (exception is ConflictException conflictException)
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+            await httpContext.Response.WriteAsJsonAsync(new 
+            {
+                Status = 409,
+                Title = "Conflict (Çatışma) Hatası",
+                Message = conflictException.Message
+            }, cancellationToken);
+            return true;
+        }
 
-        // Diğer hatalar için (404, 409 vb. ileride eklenecek)
         return false;
     }
 }

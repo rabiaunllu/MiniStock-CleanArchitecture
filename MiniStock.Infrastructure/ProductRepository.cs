@@ -38,4 +38,9 @@ public sealed class ProductRepository : IProductRepository
         // Hafızada bekleyen tüm Insert/Update işlemlerini veritabanına kesin olarak kaydeder (Commit)
         await _context.SaveChangesAsync();
     }
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken)
+{
+    // AnyAsync: Veritabanında eşleşen ilk kaydı bulur, varsa true döner.
+    return await _context.Products.AnyAsync(p => p.Name == name, cancellationToken);
+}
 }
