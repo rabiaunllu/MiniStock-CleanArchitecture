@@ -1,41 +1,39 @@
+using MiniStock.Application;
+using MiniStock.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// API ve Swagger ayarları
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// 1. Veritabanımızı (SQLite) sisteme tanıtıyoruz
+builder.Services.AddDbContext<AppDbContext>();
+
+// 2. İş İlanı (Interface) ile İşi Yapan Elemanı (Repository) eşleştiriyoruz
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+// 3. MediatR'ı tanıtıyoruz ki Application katmanındaki Handler sınıflarımızı bulabilsin
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(IProductRepository).Assembly));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// UFAK BİR HİLE: Uygulama her çalıştığında veritabanı dosyamızı (ministock.db) otomatik oluştursun
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.EnsureCreated(); 
+}
+
+// Swagger arayüzünü aktif ediyoruz
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
