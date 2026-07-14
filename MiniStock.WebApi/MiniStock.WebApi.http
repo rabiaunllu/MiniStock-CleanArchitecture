@@ -1,0 +1,6 @@
+@MiniStock.WebApi_HostAddress = http://localhost:5197
+
+GET {{MiniStock.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
