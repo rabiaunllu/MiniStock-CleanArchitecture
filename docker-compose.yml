@@ -3,13 +3,15 @@ version: '3.8'
 services:
   # 1. VERİTABANI SERVİSİ
   sqldb:
-    image: mcr.microsoft.com/azure-sql-edge:latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: ministock_db
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=SuperGizliSifre!123 # Veritabanı şifremiz
+      - MSSQL_SA_PASSWORD=SuperGizliSifre!123 
     ports:
       - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
 
   # 2. SENİN C# API UYGULAMAN
   ministock-api:
@@ -24,3 +26,7 @@ services:
     environment:
       # C# içindeki appsettings.json dosyanı ezip, Docker içindeki veritabanına bağlanmasını sağlıyoruz
       - ConnectionStrings__DefaultConnection=Server=sqldb;Database=MiniStockDb;User=sa;Password=SuperGizliSifre!123;TrustServerCertificate=True;
+
+# EKSİK OLAN VE EKLENEN KISIM BURASI
+volumes:
+  sql_data:
