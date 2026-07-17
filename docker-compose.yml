@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  # 1. VERİTABANI SERVİSİ
+  sqldb:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: ministock_db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SuperGizliSifre!123 # Veritabanı şifremiz
+    ports:
+      - "1433:1433"
+
+  # 2. SENİN C# API UYGULAMAN
+  ministock-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: ministock_api
+    ports:
+      - "8080:8080" # Senin API'ne 8080 portundan erişeceğiz
+    depends_on:
+      - sqldb # API, veritabanı hazır olmadan ÇALIŞMAYACAK
+    environment:
+      # C# içindeki appsettings.json dosyanı ezip, Docker içindeki veritabanına bağlanmasını sağlıyoruz
+      - ConnectionStrings__DefaultConnection=Server=sqldb;Database=MiniStockDb;User=sa;Password=SuperGizliSifre!123;TrustServerCertificate=True;
